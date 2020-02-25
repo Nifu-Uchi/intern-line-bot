@@ -1,5 +1,22 @@
 require 'line/bot'
 
+require 'net/http'
+require 'json'
+
+def api(key)
+    uri = URI.parse('https://api.nature.global/1/appliances')
+    req = Net::HTTP::Get.new(uri.request_uri)
+    req["Authorization"] = 'Bearer '+key
+    req["Accept"] = 'application/json'
+    https = Net::HTTP.new(uri.host, uri.port)
+    https.use_ssl = true
+    res = https.request(req)
+    puts res.body
+    puts 'Bearer '+key
+  end
+
+
+
 class WebhookController < ApplicationController
   protect_from_forgery except: [:callback] # CSRF対策無効化
 
@@ -26,16 +43,22 @@ class WebhookController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           message = {
             type: 'text',
-            text: 'event.message'
+            text: api(event.message)
           }
           client.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
-          response = client.get_message_content(event.message['id'])
-          tf = Tempfile.open("content")
-          tf.write(response.body)
+          #response = client.get_message_content(event.message['id'])
+          #tf = Tempfile.open("content")
+          #tf.write(response.body)
+          message = {
+            type: 'text',
+            text: '動画ですね？'
+          }
+          client.reply_message(event['replyToken'], message)
         end
       end
     }
     head :ok
   end
 end
+##
