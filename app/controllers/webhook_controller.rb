@@ -20,16 +20,15 @@ class WebhookController < ApplicationController
   def getaction
     remoanser = 'N'
     key = ENV["REMO_KEY"]
-    uri = URI.parse('https://api.nature.global/1/appliances')
+    uri = URI.parse('https://api.nature.global/1/users/me')
     req = Net::HTTP::Get.new(uri.request_uri)
     req["Authorization"] = 'Bearer '+key
     req["Accept"] = 'application/json'
     https = Net::HTTP.new(uri.host, uri.port)
     https.use_ssl = true
     res = https.request(req)
-    remoanser = res.body
-    remoanser = 'N'
-    return remoanser
+    hash = JSON.parse(res.body)
+    return hash['nickname']
   end
   def callback
     body = request.body.read
