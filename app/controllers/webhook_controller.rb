@@ -1,6 +1,6 @@
 require 'line/bot'
-#remokey = ENV["REMO_KEY"]
-
+require 'net/http'
+require 'json'
 class WebhookController < ApplicationController
   protect_from_forgery except: [:callback] # CSRF対策無効化
 
@@ -17,6 +17,20 @@ class WebhookController < ApplicationController
     return testtext
   end
 
+  def getaction
+    remoanser = 'N'
+    key = ENV["REMO_KEY"]
+    uri = URI.parse('https://api.nature.global/1/appliances')
+    req = Net::HTTP::Get.new(uri.request_uri)
+    req["Authorization"] = 'Bearer '+key
+    req["Accept"] = 'application/json'
+    https = Net::HTTP.new(uri.host, uri.port)
+    https.use_ssl = true
+    res = https.request(req)
+    remoanser = res.body
+
+    return remoanser
+  end
   def callback
     body = request.body.read
 
