@@ -48,7 +48,7 @@ class WebhookController < ApplicationController
           
           message = {
             type: 'text',
-            text: test
+            text: getaction
           }
           client.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
