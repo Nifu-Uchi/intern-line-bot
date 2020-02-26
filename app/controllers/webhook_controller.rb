@@ -11,7 +11,7 @@ def api
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
   res = https.request(req)
-  return res.body
+  return 'res.body'
 end
 
 
