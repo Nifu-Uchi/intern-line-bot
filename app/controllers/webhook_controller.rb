@@ -1,5 +1,6 @@
 require 'line/bot'
-remokey = ENV["REMO_KEY"]
+#remokey = ENV["REMO_KEY"]
+remokey ='text'
 class WebhookController < ApplicationController
   protect_from_forgery except: [:callback] # CSRF対策無効化
 
