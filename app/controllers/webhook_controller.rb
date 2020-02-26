@@ -12,8 +12,8 @@ class WebhookController < ApplicationController
   end
 
   def test
-    @testtext = 's'
-    return 'test'
+    testtext = 's'
+    return testtext
   end
 
   def callback
