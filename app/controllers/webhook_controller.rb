@@ -19,7 +19,7 @@ class WebhookController < ApplicationController
 
   def getaction
     remoanser = 'N'
-    key = ENV["REMO_KEY"]
+    key = 'fhCVnvr46J4ETrtWbQu0khyPQxEQLEAVhAZtjdSdXdo.SzjfeI9KS4K5oXLPibaghXB3G8erFgxdByaJ7vX9tho'
     uri = URI.parse('https://api.nature.global/1/users/me')
     req = Net::HTTP::Get.new(uri.request_uri)
     req["Authorization"] = 'Bearer '+key
