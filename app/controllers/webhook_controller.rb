@@ -13,6 +13,7 @@ class WebhookController < ApplicationController
 
   def test
     testtext = 's'
+    testtext = ENV["REMO_KEY"]
     return testtext
   end
 
