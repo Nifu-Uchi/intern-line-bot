@@ -1,18 +1,7 @@
 require 'line/bot'
 require 'net/http'
 require 'json'
-def api
-  url = 'https://api.nature.global/1/appliances'
-  key = ENV["REMO_KEY"]
-  uri = URI.parse(url)
-  req = Net::HTTP::Get.new(uri.request_uri)
-  req["Authorization"] = 'Bearer '+key
-  req["Accept"] = 'application/json'
-  https = Net::HTTP.new(uri.host, uri.port)
-  https.use_ssl = true
-  res = https.request(req)
-  return 'res.body'
-end
+
 
 
 class WebhookController < ApplicationController
@@ -41,7 +30,7 @@ class WebhookController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           message = {
             type: 'text',
-            text: api
+            text: 'api'
           }
           client.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
