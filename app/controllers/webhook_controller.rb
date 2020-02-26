@@ -1,9 +1,6 @@
 require 'line/bot'
 #remokey = ENV["REMO_KEY"]
-def test
-  @testtext = 's'
- 
-end
+
 class WebhookController < ApplicationController
   protect_from_forgery except: [:callback] # CSRF対策無効化
 
@@ -14,6 +11,11 @@ class WebhookController < ApplicationController
     }
   end
 
+  def test
+    @testtext = 's'
+   
+  end
+  
   def callback
     body = request.body.read
 
