@@ -13,9 +13,9 @@ class WebhookController < ApplicationController
 
   def test
     @testtext = 's'
-   
+    return 'test'
   end
-  
+
   def callback
     body = request.body.read
 
@@ -30,10 +30,10 @@ class WebhookController < ApplicationController
       when Line::Bot::Event::Message
         case event.type
         when Line::Bot::Event::MessageType::Text
-          test
+          
           message = {
             type: 'text',
-            text: @testtxt
+            text: test
           }
           client.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
