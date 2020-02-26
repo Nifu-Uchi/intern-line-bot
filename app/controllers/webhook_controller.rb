@@ -28,7 +28,7 @@ class WebhookController < ApplicationController
     https.use_ssl = true
     res = https.request(req)
     remoanser = res.body
-
+    remoanser = 'N'
     return remoanser
   end
   def callback
