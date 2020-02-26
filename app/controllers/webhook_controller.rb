@@ -1,6 +1,7 @@
 require 'line/bot'
 #remokey = ENV["REMO_KEY"]
-remokey ='text'
+def test
+  return 'oaey'
 class WebhookController < ApplicationController
   protect_from_forgery except: [:callback] # CSRF対策無効化
 
@@ -27,7 +28,7 @@ class WebhookController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           message = {
             type: 'text',
-            text: 'test'
+            text: test
           }
           client.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
