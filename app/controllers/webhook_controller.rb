@@ -26,7 +26,7 @@ class WebhookController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           message = {
             type: 'text',
-            text: remokey['text']
+            text: remokey
           }
           client.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
