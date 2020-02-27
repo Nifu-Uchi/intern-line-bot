@@ -20,3 +20,7 @@
 
 # Ignore ruby-version
 /.ruby-version
+
+.DS_Store
+/.env
+
