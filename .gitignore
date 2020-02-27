@@ -22,3 +22,5 @@
 /.ruby-version
 
 .DS_Store
+
+/.env

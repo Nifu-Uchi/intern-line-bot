@@ -20,7 +20,7 @@ class WebhookController < ApplicationController
   def getaction
     remoanser = 'N'
     key = ENV["REMO_KEY"]
-    uri = URI.parse('https://api.nature.global/1/users/me')
+    uri = URI.parse('https://api.nature.global/1/devices')
     req = Net::HTTP::Get.new(uri.request_uri)
     req["Authorization"] = 'Bearer '+key
     req["Accept"] = 'application/json'
@@ -28,9 +28,14 @@ class WebhookController < ApplicationController
     https.use_ssl = true
     res = https.request(req)
     hash = JSON.parse(res.body)
-    anser = hash['nickname']
+    anser = hash.dig(0,'newest_events','te','val')
+    puts 'test'
     puts anser
     return anser
+  end
+  def gettemp
+    
+    return 'temp'
   end
   def callback
     body = request.body.read
@@ -49,7 +54,7 @@ class WebhookController < ApplicationController
           
           message = {
             type: 'text',
-            text: getaction
+            text: gettemp
           }
           client.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
