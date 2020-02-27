@@ -1,6 +1,7 @@
 require 'line/bot'
 require 'net/http'
 require 'json'
+require 'bigdecimal'
 class WebhookController < ApplicationController
   protect_from_forgery except: [:callback] # CSRF対策無効化
 
@@ -11,16 +12,22 @@ class WebhookController < ApplicationController
     }
   end
 
-  def test
-    testtext = 's'
-    testtext = ENV["REMO_KEY"]
-    return testtext
+#送られたメッセージの判定
+  def gettext(msg)
+    actionlist = {"気温は？"=>gettemp} #キーワードと呼び出すアクションの辞書
+    actionrespon = actionlist.dig(msg)#アクションの結果を格納
+    if actionrespon.nil? then
+      actionrespon = 'ごめん，わからない...'
+    end
+    return actionrespon
   end
+#送られたメッセージの判定ここまで############
 
-  def getaction
+##API関数ここから############
+  def apiget(url)
     remoanser = 'N'
     key = ENV["REMO_KEY"]
-    uri = URI.parse('https://api.nature.global/1/devices')
+    uri = URI.parse(url)
     req = Net::HTTP::Get.new(uri.request_uri)
     req["Authorization"] = 'Bearer '+key
     req["Accept"] = 'application/json'
@@ -28,15 +35,19 @@ class WebhookController < ApplicationController
     https.use_ssl = true
     res = https.request(req)
     hash = JSON.parse(res.body)
-    anser = hash.dig(0,'newest_events','te','val')
-    puts 'test'
-    puts anser
+    
+    return hash
+  end
+
+  def gettemp #気温取る
+    hash = apiget('https://api.nature.global/1/devices')
+    tempr = hash.dig(0,'newest_events','te','val')
+    anser = ('現在の室温は'+(BigDecimal(tempr.to_s).floor(1).to_f).to_s+'度だよ．')
     return anser
   end
-  def gettemp
-    
-    return 'temp'
-  end
+##API関数ここまで############
+
+
   def callback
     body = request.body.read
 
@@ -51,10 +62,10 @@ class WebhookController < ApplicationController
       when Line::Bot::Event::Message
         case event.type
         when Line::Bot::Event::MessageType::Text
-          
+          cat_response = gettext(event.message['text'])
           message = {
             type: 'text',
-            text: gettemp
+            text: cat_response
           }
           client.reply_message(event['replyToken'], message)
         when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
