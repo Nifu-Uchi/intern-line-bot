@@ -12,23 +12,56 @@ class WebhookController < ApplicationController
     }
   end
 
-  def message_split(msg)
+  def message_convert(msg)
     result = msg.split("、")
+    buttonlist = {"オン"=>'on','オフ'=>'off'}
+    result[1] = buttonlist[result[1]]
     return result
   end
-
+  
 #送られたメッセージの判定
   def call_api(appliance,order)
+
     case appliance
-    when '気温は？' 
+    when '気温は？' ,
       action_response = gettemp
+    when '寒くない？'　 
+      nowtemp =gettemp
+      if nowtemp > 14 then
+      end
+    #エアコンのオンオフをしたときにgettempして，それに応じたメッセージを返す
+    when 'リビング','寝室'
+      action_response = light(appliance,order)
+    when '全灯'
+      light('リビング','on')
+      light('寝室','on')
+      action_response = '全部つけたよ'
     else
       action_response = 'ごめん，わからない...'
     end
     return action_response
   end
 #送られたメッセージの判定ここまで############
-
+def light(lightname,button)
+  puts(button)
+  #puts('ライト関数')
+  #puts(lightname)
+  if button=='N' then
+    return '何を押せばいいの？'
+  end
+  appliance_id_list = {'リビング'=>ENV["LIVINGLIGHT_ID"],'寝室'=>ENV["BROOMLIGHT_ID"]}
+  appliance_id = appliance_id_list.dig(lightname)
+  if appliance_id.nil? then
+    return 'どれを動かせばいいかわからなくなっちゃった'
+  end
+  url = 'https://api.nature.global/1/appliances/'+appliance_id+'/light?button='+button
+  puts (url)
+  summary = apipost(url)
+  puts(summary)
+  responsemsg = lightname+'ライトを'+button+'にしたよ'
+  puts(responsemsg)
+  return responsemsg
+end
 ##API関数ここから############
   def apiget(url)
     key = ENV["REMO_KEY"]
@@ -40,6 +73,22 @@ class WebhookController < ApplicationController
     https.use_ssl = true
     res = https.request(req)
     hash = JSON.parse(res.body)
+    return hash
+  end
+
+  def apipost(url)
+    remoanser = 'N'
+    key = ENV["REMO_KEY"]
+    uri = URI.parse(url)
+    puts(uri)
+    req = Net::HTTP::Post.new(uri.request_uri)
+    req["Authorization"] = 'Bearer '+key
+    req["Accept"] = 'application/json'
+    https = Net::HTTP.new(uri.host, uri.port)
+    https.use_ssl = true
+    res = https.request(req)
+    hash = JSON.parse(res.body)
+    
     return hash
   end
 
@@ -65,7 +114,7 @@ class WebhookController < ApplicationController
       when Line::Bot::Event::Message
         case event.type
         when Line::Bot::Event::MessageType::Text
-          appliance,order = message_split(event.message['text'])
+          appliance,order = message_convert(event.message['text'])
           cat_response = call_api(appliance,order)
           message = {
             type: 'text',
