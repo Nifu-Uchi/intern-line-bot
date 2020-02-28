@@ -138,9 +138,9 @@ class WebhookController < ApplicationController
     appliance_state['bedroomlight_state'] = hash.dig(0,'light','state','power')
     appliance_state['livingroomlight_state'] = hash.dig(2,'light','state','power')
     if (hash.dig(1,'settings','button')) == 'power-off' then
-      appliance_state['aircon_state'] = 'たぶんついてる'
+      appliance_state['aircon_state'] = 'たぶん消えてる'
     else
-      appliance_state['aircon_state'] = '消えてる'
+      appliance_state['aircon_state'] = 'ついてる'
     end
     return appliance_state
   end
