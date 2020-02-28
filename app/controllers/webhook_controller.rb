@@ -17,6 +17,9 @@ class WebhookController < ApplicationController
     result = msg.split("、")
     buttonlist = {"オン"=>'on','オフ'=>'off'}
     result[1] = buttonlist[result[1]]
+    if result[1].nil? then
+      result[1] = 'N'
+    end
     return result
   end
   
@@ -24,9 +27,7 @@ class WebhookController < ApplicationController
   def call_api(appliance,order)
     case appliance
     when '気温は？'
-      ans = gettemp
-      additional_massage = 'にゃ'
-      action_response = ("今の室温は" + ans.to_s + "度くらい" + additional_massage)
+      action_response = ("今の室温は" + gettemp.to_s + "度くらいにゃ.")
     when '寒くない？'
       nowtemp =gettemp.to_f
       if nowtemp > 14 then
@@ -37,27 +38,27 @@ class WebhookController < ApplicationController
     when '家をチェックして！'
       answerset = get_appliances_status
       temp = gettemp.to_s
-      action_response = "...はーーーーい.\nえーっと...\nいまの室温は"+temp+"度\n"+
-                        'リビングの電気は'+answerset['livingroomlight_state']+"になってて,\n"+
-                        '寝室の電気は' +answerset['bedroomlight_state']+"\n"+
-                        'あと，エアコンは' + answerset['aircon_state'] + "かなぁ\n"+
-                        "もう二度とやらせないでほしいにゃ"
+      action_response = "...はーーーーい.\nえーっと...\nいまの室温は" + temp + "度\n"+
+                        'リビングの電気は' + answerset['livingroomlight_state'] + "になってて,\n" +
+                        '寝室の電気は' + answerset['bedroomlight_state'] + "\n" +
+                        'あと，エアコンは' + answerset['aircon_state'] + "かなぁ.\n"+
+                        "もう二度とやらせないでほしいにゃ."
     when 'リビング','寝室'
       action_response = light(appliance,order)
     when '電気全部つけて'
       light('リビング','on')
       light('寝室','on')
-      action_response = '全部つけたよ'
+      action_response = '全部つけたよ.'
     when '電気全部消して'
       light('リビング','off')
       light('寝室','off')
-      action_response = '全部消したよ'
+      action_response = '全部消したよ.'
     when 'みんなを起こして！'
       light('リビング','on')
       light('寝室','on')
       tv('テレビ','on')
-      tv('エアコン','on')
-      action_response = '全部つけた！！！みんな起きてにゃ'
+      aircon('エアコン','on')
+      action_response = '全部つけた！！！みんな起きてにゃ.'
     when '節約してよ'
       light('リビング','off')
       light('寝室','off')
@@ -69,29 +70,29 @@ class WebhookController < ApplicationController
       action_response = tv(appliance,order)
     else
       err_respon = ['なに？','今寝てるからさ...','おやつの話？','靴下かじっていい？','さっきおやつ箱開けちゃった...']
-      random = Random.new
-      action_response = err_respon[random.rand(0..(err_respon).size)]
+
+      action_response = err_respon.sample
     end
     return action_response
   end
 
 ##家電操作関数（POST）
   def aircon(appliance,button)
-  if button=='N' then
-    return '何を押せばいいの？'
-  elsif button == 'on'
-    aircon_button = ''
-  elsif button = 'off'
-    aircon_button = 'power-off'
-  end
-  appliance_id = APPLIANCE_ID_LIST[appliance]
-  if appliance_id.nil? then
-    return 'どれを動かせばいいかわからなくなっちゃった'
-  end
-  url = 'https://api.nature.global/1/appliances/'+appliance_id+'/aircon_settings?button='+aircon_button
-  summary = apipost(url)
-  responsemsg = 'エアコンを'+button+'にしたよ'
-  return responsemsg
+    if button=='N' then
+      return '何を押せばいいの？'
+    elsif button == 'on'
+      aircon_button = ''
+    elsif button = 'off'
+      aircon_button = 'power-off'
+    end
+    appliance_id = APPLIANCE_ID_LIST[appliance]
+    if appliance_id.nil? then
+      return 'どれを動かせばいいかわからなくなっちゃった'
+    end
+    url = 'https://api.nature.global/1/appliances/'+appliance_id+'/aircon_settings?button='+aircon_button
+    summary = apipost(url)
+    responsemsg = 'エアコンを'+button+'にしたよ'
+    return responsemsg
   end
 
   def light(appliance,button)
@@ -100,11 +101,11 @@ class WebhookController < ApplicationController
     end
     appliance_id = APPLIANCE_ID_LIST[appliance]
     if appliance_id.nil? then
-      return 'どれを動かせばいいかわからなくなっちゃった'
+      return 'どれを動かせばいいかわからなくなっちゃった.'
     end
     url = 'https://api.nature.global/1/appliances/'+appliance_id+'/light?button='+button
     summary = apipost(url)
-    responsemsg = appliance+'ライトを'+button+'にしたよ'
+    responsemsg = appliance+'ライトを'+button+'にしたよ.'
   end
   def tv(appliance,button)
     if button=='N' then
@@ -115,11 +116,11 @@ class WebhookController < ApplicationController
     puts(APPLIANCE_ID_LIST)
     puts(ENV)
     if appliance_id.nil? then
-      return 'どれを動かせばいいかわからなくなっちゃった'
+      return 'どれを動かせばいいかわからなくなっちゃった.'
     end
     url = 'https://api.nature.global/1/appliances/'+appliance_id+'/tv?button=power'##テレビはON/OFF区別がない
     summary = tvpost(url)
-    responsemsg = 'テレビの電源ボタンを押しといたよ'
+    responsemsg = 'テレビの電源ボタンを押しといたよ.'
   end
 
 ##状態取得関数（GET)
@@ -131,17 +132,17 @@ class WebhookController < ApplicationController
   end
 
   def get_appliances_status
-  hash = apiget('https://api.nature.global/1/appliances')
-  state_convert = {'on': 'つけっぱ','off': 'きえてる','power-off': 'きえてる','': 'ついてる'}
-  appliance_state ={}
-  appliance_state['bedroomlight_state'] = hash.dig(0,'light','state','power')
-  appliance_state['livingroomlight_state'] = hash.dig(2,'light','state','power')
-  if (hash.dig(1,'settings','button')).nil? then
-    appliance_state['aircon_state'] = 'たぶんついてる'
-  else
-    appliance_state['aircon_state'] = '消えてる'
-  end
-  return appliance_state
+    hash = apiget('https://api.nature.global/1/appliances')
+    state_convert = {'on': 'つけっぱ','off': 'きえてる','power-off': 'きえてる','': 'ついてる'}
+    appliance_state ={}
+    appliance_state['bedroomlight_state'] = hash.dig(0,'light','state','power')
+    appliance_state['livingroomlight_state'] = hash.dig(2,'light','state','power')
+    if (hash.dig(1,'settings','button')) == 'power-off' then
+      appliance_state['aircon_state'] = 'たぶんついてる'
+    else
+      appliance_state['aircon_state'] = '消えてる'
+    end
+    return appliance_state
   end
 
 ##api get/post
@@ -158,7 +159,7 @@ class WebhookController < ApplicationController
     return hash
   end
   def apipost(url)
-    remoanswer = 'N'
+    
     key = ENV["REMO_KEY"]
     uri = URI.parse(url)
     puts(uri)
@@ -169,11 +170,10 @@ class WebhookController < ApplicationController
     https.use_ssl = true
     res = https.request(req)
     hash = JSON.parse(res.body)
-    
     return hash
   end
   def tvpost(url)
-    remoanswer = 'N'
+    
     key = ENV["REMO_KEY"]
     uri = URI.parse(url)
     puts(uri)
